@@ -1,4 +1,6 @@
 # Flagged
 
-Here's a zipped copy folder of Flagged:
-https://drive.google.com/file/d/19Ur4wQxDCEmuVsrPLekpiGOBhNtUbUsj/view?usp=sharing
+1. Create a virtual environment
+2. Install the requirements in requirements.txt
+3. Unzip Phishing_Email.zip
+4. Run `streamlit run app.py`
