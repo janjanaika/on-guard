@@ -5,6 +5,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
+from googletrans import Translator
 
 raw_spam_data = pd.read_csv("Phishing_Email.csv")
 spam_data = raw_spam_data.where((pd.notnull(raw_spam_data)),"")
@@ -35,7 +36,7 @@ model.fit(X_train_features, y_train)
 
 form = st.form(key="my_form")
 text = form.text_area("Text to analyze")
-files = form.file_uploader(label="Upload text files", type=["txt"], accept_multiple_files=True)
+files = form.file_uploader(label="Upload .txt files", type=["txt", "docx", "odt"], accept_multiple_files=True)
 submit_button = form.form_submit_button(label="Submit")
 
 def flag(text):
@@ -44,23 +45,29 @@ def flag(text):
    prediction = model.predict(input_data_features)
    return prediction
 
-# text = ["Congratulations! You won the lotto!", "What's your social security number?"]
-
+translator = Translator()
 txt = ""
-if submit_button:
+if submit_button and len(text) > 0:
+   text = translator.translate(text).text
    if flag(text)[0] == 0:
       txt = "Threat detected in text!"
    else:
       txt = "This text is safe!"
 
 file_txt = []
-if files != None:
+
+if len(files) > 0:
    for f in files:
       content = f.getvalue().decode()
-      if flag(content)[0] == 0:
-         file_txt.append(f"Threat detected in {f.name}!")
+      if len(content) == 0:
+         file_txt.append(f"{f.name} is empty!")
       else:
-         file_txt.append(f"{f.name} is safe!")
+         content = content
+         content = translator.translate(content).text
+         if flag(content)[0] == 0:
+            file_txt.append(f"Threat detected in {f.name}!")
+         else:
+            file_txt.append(f"{f.name} is safe!")
 
 st.write(txt)
 for t in file_txt:
