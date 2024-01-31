@@ -74,13 +74,13 @@ if submit_button:
 
    email_text = "\n".join(email_text)
    msg = MIMEText(email_text)
-   msg["From"] = "lunasemr@gmail.com"
+   msg["From"] = st.secrets["email"]
    msg["To"] = user_email
    msg["Subject"] = "Results from Flagged's text analysis"
    server = smtplib.SMTP('smtp.gmail.com', 587)
    server.starttls()
-   server.login("lunasemr@gmail.com", st.secrets["password"])
-   server.sendmail("lunasemr@gmail.com", user_email, msg.as_string())
+   server.login(st.secrets["email"], st.secrets["password"])
+   server.sendmail(st.secrets["email"], user_email, msg.as_string())
    server.quit()
    st.success("An email containing the results has been sent to your account! (If you don't see it, check your spam folder)")
 
