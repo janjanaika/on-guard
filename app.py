@@ -56,7 +56,7 @@ if submit_button:
          email_text.append(text)
          email_text.append("\n")
       else:
-         txt = "This text is safe!"
+         txt = ":green[This text is safe!]"
 
    if len(files) > 0:
       for f in files:
@@ -71,7 +71,7 @@ if submit_button:
                email_text.append(content)
                email_text.append("\n")
             else:
-               file_txt.append(f"{f.name} is safe!")
+               file_txt.append(f":green[{f.name} is safe!]")
 
    email_pattern = r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b"
    if re.fullmatch(email_pattern, user_email):
@@ -87,6 +87,8 @@ if submit_button:
       server.quit()
       if len(email_text) > 0:
          st.error("There was a threat in your provided file(s)! More details will be sent through your email. (If you don't see it, check your spam folder.)")
+      elif len(files) > 0 and len(email_text) == 0:
+         st.success("Good news! All of your files are safe!")
 
 
 st.write(txt)
