@@ -6,6 +6,7 @@ certifi==2024.2.2
 chardet==3.0.4
 charset-normalizer==3.3.2
 click==8.1.7
+easy-ocr==0.1.1
 easyocr==1.7.1
 filelock==3.13.1
 fsspec==2024.2.0
@@ -47,10 +48,6 @@ nvidia-nccl-cu12==2.19.3
 nvidia-nvjitlink-cu12==12.3.101
 nvidia-nvtx-cu12==12.1.105
 opencv-python-headless==4.9.0.80
-markdown-it-py==3.0.0
-MarkupSafe==2.1.5
-mdurl==0.1.2
-numpy==1.26.4
 packaging==23.2
 pandas==2.2.0
 pillow==10.2.0
@@ -63,10 +60,6 @@ python-bidi==0.4.2
 python-dateutil==2.8.2
 pytz==2024.1
 PyYAML==6.0.1
-pydeck==0.8.1b0
-Pygments==2.17.2
-python-dateutil==2.8.2
-pytz==2024.1
 referencing==0.33.0
 requests==2.31.0
 rfc3986==1.5.0
