@@ -6,12 +6,9 @@ certifi==2024.2.2
 chardet==3.0.4
 charset-normalizer==3.3.2
 click==8.1.7
-<<<<<<< HEAD
 easyocr==1.7.1
 filelock==3.13.1
 fsspec==2024.2.0
-=======
->>>>>>> 3f84aabe33e4216a6953ed078fd8bd9664abcc37
 gitdb==4.0.11
 GitPython==3.1.41
 googletrans==4.0.0rc1
@@ -23,16 +20,12 @@ httpcore==0.9.1
 httpx==0.13.3
 hyperframe==5.2.0
 idna==2.10
-<<<<<<< HEAD
 imageio==2.33.1
-=======
->>>>>>> 3f84aabe33e4216a6953ed078fd8bd9664abcc37
 importlib-metadata==7.0.1
 Jinja2==3.1.3
 joblib==1.3.2
 jsonschema==4.21.1
 jsonschema-specifications==2023.12.1
-<<<<<<< HEAD
 lazy_loader==0.3
 markdown-it-py==3.0.0
 MarkupSafe==2.1.5
@@ -54,18 +47,15 @@ nvidia-nccl-cu12==2.19.3
 nvidia-nvjitlink-cu12==12.3.101
 nvidia-nvtx-cu12==12.1.105
 opencv-python-headless==4.9.0.80
-=======
 markdown-it-py==3.0.0
 MarkupSafe==2.1.5
 mdurl==0.1.2
 numpy==1.26.4
->>>>>>> 3f84aabe33e4216a6953ed078fd8bd9664abcc37
 packaging==23.2
 pandas==2.2.0
 pillow==10.2.0
 protobuf==4.25.2
 pyarrow==15.0.0
-<<<<<<< HEAD
 pyclipper==1.3.0.post5
 pydeck==0.8.1b0
 Pygments==2.17.2
@@ -73,31 +63,23 @@ python-bidi==0.4.2
 python-dateutil==2.8.2
 pytz==2024.1
 PyYAML==6.0.1
-=======
 pydeck==0.8.1b0
 Pygments==2.17.2
 python-dateutil==2.8.2
 pytz==2024.1
->>>>>>> 3f84aabe33e4216a6953ed078fd8bd9664abcc37
 referencing==0.33.0
 requests==2.31.0
 rfc3986==1.5.0
 rich==13.7.0
 rpds-py==0.17.1
-<<<<<<< HEAD
 scikit-image==0.22.0
 scikit-learn==1.4.0
 scipy==1.12.0
 shapely==2.0.2
-=======
-scikit-learn==1.4.0
-scipy==1.12.0
->>>>>>> 3f84aabe33e4216a6953ed078fd8bd9664abcc37
 six==1.16.0
 smmap==5.0.1
 sniffio==1.3.0
 streamlit==1.31.0
-<<<<<<< HEAD
 sympy==1.12
 tenacity==8.2.3
 threadpoolctl==3.2.0
@@ -108,13 +90,6 @@ torch==2.2.0
 torchvision==0.17.0
 tornado==6.4
 triton==2.2.0
-=======
-tenacity==8.2.3
-threadpoolctl==3.2.0
-toml==0.10.2
-toolz==0.12.1
-tornado==6.4
->>>>>>> 3f84aabe33e4216a6953ed078fd8bd9664abcc37
 typing_extensions==4.9.0
 tzdata==2023.4
 tzlocal==5.2
