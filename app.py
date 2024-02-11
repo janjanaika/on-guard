@@ -1,15 +1,31 @@
 import streamlit as st
-import numpy as np
 import pandas as pd
+import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score
 from googletrans import Translator
 import smtplib
 from email.mime.text import MIMEText
+import re
+import requests
+import easyocr as ocr
+from PIL import Image
 
-raw_spam_data = pd.read_csv("Phishing_Email.csv")
+st.set_page_config(
+   page_title="Flagged!",
+   page_icon="🚩"
+)
+
+@st.cache_data(show_spinner="Loading data...")
+def load_data():
+   return pd.read_csv("Phishing_Email.csv")
+
+@st.cache_resource
+def load_model():
+   return ocr.Reader(["en"], model_storage_directory=".")
+
+raw_spam_data = load_data()
 spam_data = raw_spam_data.where((pd.notnull(raw_spam_data)),"")
 spam_data.loc[spam_data["Email Type"] == 'Phishing Email', "Email Type",] = 1
 spam_data.loc[spam_data["Email Type"] == 'Safe Email', "Email Type",] = 0
@@ -30,9 +46,10 @@ model = LogisticRegression()
 model.fit(X_train_features, y_train)
 
 form = st.form(key="my_form")
-user_email = form.text_input("Gmail")
 text = form.text_area("Text to analyze")
-files = form.file_uploader(label="Upload .txt files", type=["txt", "docx", "odt"], accept_multiple_files=True)
+txt_files = form.file_uploader(label="Upload .txt files", type=["txt"], accept_multiple_files=True)
+images = form.file_uploader(label="Upload images", type=["png", "jpg", "jpeg"], accept_multiple_files=True)
+user_email = form.text_input("Gmail (optional)")
 submit_button = form.form_submit_button(label="Submit")
 
 def flag(text):
@@ -41,49 +58,98 @@ def flag(text):
    prediction = model.predict(input_data_features)
    return prediction
 
+def ocr_space_file(filename, overlay=False, api_key="helloworld", language="eng"):
+   payload = {'isOverlayRequired': overlay, 'apikey': api_key, 'language': language,}
+   with open(filename, 'rb') as f:
+      r = requests.post('https://api.ocr.space/v1/ocrapi', files={filename: f}, data=payload,)
+   return r.content.decode()
+
+content_type_mapping = {
+    "jpg": "image/jpeg",
+    "jpeg": "image/jpeg",
+    "png": "image/png",
+    "gif": "image/gif",
+}
+
 email_text = []
 translator = Translator()
+reader = load_model()
 txt = ""
-file_txt = []
+file_results = []
+img_results = []
 
 if submit_button:
-   if len(text) > 0:
-      text = translator.translate(text).text
-      if flag(text)[0] == 1:
-         txt = ":red[Threat detected in the provided text!]"
-         email_text.append("Threat detected in the provided text!")
-         email_text.append(text)
-         email_text.append("\n")
+   with st.spinner("Processing your input..."):
+      if len(text) == 0 or text.isspace():
+         txt = "This text is empty!"
       else:
-         txt = "This text is safe!"
-
-   if len(files) > 0:
-      for f in files:
-         content = f.getvalue().decode()
-         if len(content) == 0:
-            file_txt.append(f"{f.name} is empty!")
+         text = translator.translate(text).text
+         if flag(text)[0] == 1:
+            txt = ":red[Threat detected in the provided text!]"
+            email_text.append("Threat detected in the provided text!")
+            email_text.append(text)
+            email_text.append("\n")
          else:
-            content = translator.translate(content).text
-            if flag(content)[0] == 1:
-               file_txt.append(f":red[Threat detected in {f.name}!]")
-               email_text.append(f"Threat detected in {f.name}!")
-               email_text.append(content)
-               email_text.append("\n")
-            else:
-               file_txt.append(f"{f.name} is safe!")
+            txt = ":green[Looks like this text is safe!]"
 
-   email_text = "\n".join(email_text)
-   msg = MIMEText(email_text)
-   msg["From"] = st.secrets["email"]
-   msg["To"] = user_email
-   msg["Subject"] = "Results from Flagged's text analysis"
-   server = smtplib.SMTP('smtp.gmail.com', 587)
-   server.starttls()
-   server.login(st.secrets["email"], st.secrets["password"])
-   server.sendmail(st.secrets["email"], user_email, msg.as_string())
-   server.quit()
-   st.success("An email containing the results has been sent to your account! (If you don't see it, check your spam folder)")
+      if len(txt_files) > 0:
+         for f in txt_files:
+            content = f.getvalue().decode()
+            if len(content) == 0 or content.isspace():
+               file_results.append(f"{f.name} is empty!")
+            else:
+               content = translator.translate(content).text
+               if flag(content)[0] == 1:
+                  file_results.append(f":red[Threat detected in {f.name}!]")
+                  email_text.append(f"Threat detected in {f.name}!")
+                  email_text.append(content)
+                  email_text.append("\n")
+               else:
+                  file_results.append(f":green[Looks like {f.name} is safe!]")
+
+      if len(images) > 0:
+         for img in images:
+            input_image = Image.open(img)
+            result = reader.readtext(np.array(input_image))
+            img_text = []
+
+            for text in result:
+               img_text.append(text[1])
+            
+            if len(img_text) == 0:
+               file_results.append(f"The AI can't see any text in {img.name}.")
+            else:
+               img_content = " ".join(img_text)
+               img_content = translator.translate(img_content).text
+               if flag(img_content)[0] == 1:
+                  file_results.append(f":red[Threat detected in {img.name}!]")
+                  email_text.append(f"Threat detected in {img.name}!")
+                  email_text.append(img_content)
+                  email_text.append("\n")
+               else:
+                  file_results.append(f":green[Looks like {img.name} is safe!]")
+
+   email_pattern = r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b"
+   if re.fullmatch(email_pattern, user_email):
+      email_text = "\n".join(email_text)
+      msg = MIMEText(email_text)
+      msg["From"] = st.secrets["email"]
+      msg["To"] = user_email
+      msg["Subject"] = "Results from Flagged's text analysis"
+      server = smtplib.SMTP('smtp.gmail.com', 587)
+      server.starttls()
+      server.login(st.secrets["email"], st.secrets["password"])
+      server.sendmail(st.secrets["email"], user_email, msg.as_string())
+      server.quit()
+      if len(email_text) > 0:
+         st.error("There was a threat in your provided file(s)! More details will be sent through your email. (If you don't see it, check your spam folder.)")
+      elif len(txt_files) > 0 and len(email_text) == 0:
+         st.success("Good news! All of your files are safe!")
+
 
 st.write(txt)
-for t in file_txt:
-   st.write(t)
+for f in file_results:
+   st.write(f)
+
+for i in img_results:
+   st.write(i)
