@@ -144,7 +144,7 @@ if submit_button:
       if len(email_text) > 0:
          st.error("There was a threat in your provided file(s)! More details will be sent through your email. (If you don't see it, check your spam folder.)")
       elif len(txt_files) > 0 and len(email_text) == 0:
-         st.success("Good news! All of your files are safe!")
+         st.success("Good news! Looks like all of your files are safe!")
 
 
 st.write(txt)
