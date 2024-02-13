@@ -49,7 +49,7 @@ form = st.form(key="my_form")
 text = form.text_area("Text to analyze")
 txt_files = form.file_uploader(label="Upload .txt files", type=["txt"], accept_multiple_files=True)
 images = form.file_uploader(label="Upload images", type=["png", "jpg", "jpeg"], accept_multiple_files=True)
-user_email = form.text_input("Gmail (optional)")
+user_email = form.text_input("Gmail (optional)", placeholder="johndoe@gmail.com")
 submit_button = form.form_submit_button(label="Submit")
 
 def flag(text):
@@ -58,20 +58,7 @@ def flag(text):
    prediction = model.predict(input_data_features)
    return prediction
 
-def ocr_space_file(filename, overlay=False, api_key="helloworld", language="eng"):
-   payload = {'isOverlayRequired': overlay, 'apikey': api_key, 'language': language,}
-   with open(filename, 'rb') as f:
-      r = requests.post('https://api.ocr.space/v1/ocrapi', files={filename: f}, data=payload,)
-   return r.content.decode()
-
-content_type_mapping = {
-    "jpg": "image/jpeg",
-    "jpeg": "image/jpeg",
-    "png": "image/png",
-    "gif": "image/gif",
-}
-
-email_text = []
+notif_text = []
 translator = Translator()
 reader = load_model()
 txt = ""
@@ -86,9 +73,9 @@ if submit_button:
          text = translator.translate(text).text
          if flag(text)[0] == 1:
             txt = ":red[Threat detected in the provided text!]"
-            email_text.append("Threat detected in the provided text!")
-            email_text.append(text)
-            email_text.append("\n")
+            notif_text.append("Threat detected in the provided text!")
+            notif_text.append(text)
+            notif_text.append("\n")
          else:
             txt = ":green[Looks like this text is safe!]"
 
@@ -101,9 +88,9 @@ if submit_button:
                content = translator.translate(content).text
                if flag(content)[0] == 1:
                   file_results.append(f":red[Threat detected in {f.name}!]")
-                  email_text.append(f"Threat detected in {f.name}!")
-                  email_text.append(content)
-                  email_text.append("\n")
+                  notif_text.append(f"Threat detected in {f.name}!")
+                  notif_text.append(content)
+                  notif_text.append("\n")
                else:
                   file_results.append(f":green[Looks like {f.name} is safe!]")
 
@@ -123,16 +110,16 @@ if submit_button:
                img_content = translator.translate(img_content).text
                if flag(img_content)[0] == 1:
                   file_results.append(f":red[Threat detected in {img.name}!]")
-                  email_text.append(f"Threat detected in {img.name}!")
-                  email_text.append(img_content)
-                  email_text.append("\n")
+                  notif_text.append(f"Threat detected in {img.name}!")
+                  notif_text.append(img_content)
+                  notif_text.append("\n")
                else:
                   file_results.append(f":green[Looks like {img.name} is safe!]")
 
    email_pattern = r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b"
    if re.fullmatch(email_pattern, user_email):
-      email_text = "\n".join(email_text)
-      msg = MIMEText(email_text)
+      notif_text = "\n".join(notif_text)
+      msg = MIMEText(notif_text)
       msg["From"] = st.secrets["email"]
       msg["To"] = user_email
       msg["Subject"] = "Results from Flagged's text analysis"
@@ -141,11 +128,10 @@ if submit_button:
       server.login(st.secrets["email"], st.secrets["password"])
       server.sendmail(st.secrets["email"], user_email, msg.as_string())
       server.quit()
-      if len(email_text) > 0:
-         st.error("There was a threat in your provided file(s)! More details will be sent through your email. (If you don't see it, check your spam folder.)")
-      elif len(txt_files) > 0 and len(email_text) == 0:
+      if len(notif_text) > 0:
+         st.error("There was a threat in your provided file(s)! More details will be sent through your email. If you don't see it, check your spam folder.")
+      elif len(txt_files) > 0 and len(notif_text) == 0:
          st.success("Good news! Looks like all of your files are safe!")
-
 
 st.write(txt)
 for f in file_results:
