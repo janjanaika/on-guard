@@ -13,8 +13,8 @@ import easyocr as ocr
 from PIL import Image
 
 st.set_page_config(
-   page_title="Flagged!",
-   page_icon="🚩"
+   page_title="On Guard",
+   page_icon="🤺"
 )
 
 @st.cache_data(show_spinner="Loading data...")
@@ -52,7 +52,7 @@ images = form.file_uploader(label="Upload images", type=["png", "jpg", "jpeg"], 
 user_email = form.text_input("Send alerts to (recommended):", placeholder="johndoe@gmail.com")
 submit_button = form.form_submit_button(label="Submit")
 
-def flag(text):
+def detect(text):
    text = [text]
    input_data_features = feature_extraction.transform(text)
    prediction = model.predict(input_data_features)
@@ -71,7 +71,7 @@ if submit_button:
          txt = "This text is empty!"
       else:
          text = translator.translate(text).text
-         if flag(text)[0] == 1:
+         if detect(text)[0] == 1:
             txt = ":red[Threat detected in the provided text!]"
             notif_text.append("Threat detected in the provided text!")
             notif_text.append(text)
@@ -86,7 +86,7 @@ if submit_button:
                file_results.append(f"{f.name} is empty!")
             else:
                content = translator.translate(content).text
-               if flag(content)[0] == 1:
+               if detect(content)[0] == 1:
                   file_results.append(f":red[Threat detected in {f.name}!]")
                   notif_text.append(f"Threat detected in {f.name}!")
                   notif_text.append(content)
@@ -108,7 +108,7 @@ if submit_button:
             else:
                img_content = " ".join(img_text)
                img_content = translator.translate(img_content).text
-               if flag(img_content)[0] == 1:
+               if detect(img_content)[0] == 1:
                   file_results.append(f":red[Threat detected in {img.name}!]")
                   notif_text.append(f"Threat detected in {img.name}!")
                   notif_text.append(img_content)
@@ -122,7 +122,7 @@ if submit_button:
       msg = MIMEText(notif_text)
       msg["From"] = st.secrets["email"]
       msg["To"] = user_email
-      msg["Subject"] = "Results from Flagged's text analysis"
+      msg["Subject"] = "Results from On Guard's text analysis"
       server = smtplib.SMTP('smtp.gmail.com', 587)
       server.starttls()
       server.login(st.secrets["email"], st.secrets["password"])
