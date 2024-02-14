@@ -25,6 +25,8 @@ def load_data():
 def load_model():
    return ocr.Reader(["en"], model_storage_directory=".")
 
+st.title(":fencer: On Guard")
+
 raw_spam_data = load_data()
 spam_data = raw_spam_data.where((pd.notnull(raw_spam_data)),"")
 spam_data.loc[spam_data["Email Type"] == 'Phishing Email', "Email Type",] = 1
