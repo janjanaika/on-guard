@@ -27,6 +27,13 @@ def load_model():
 
 st.title(":fencer: On Guard")
 
+form = st.form(key="my_form")
+text = form.text_area("Text to analyze")
+txt_files = form.file_uploader(label="Upload .txt files", type=["txt"], accept_multiple_files=True)
+images = form.file_uploader(label="Upload images", type=["png", "jpg", "jpeg"], accept_multiple_files=True)
+user_email = form.text_input("Send alerts to (recommended):", placeholder="johndoe@gmail.com")
+submit_button = form.form_submit_button(label="Submit")
+
 raw_spam_data = load_data()
 spam_data = raw_spam_data.where((pd.notnull(raw_spam_data)),"")
 spam_data.loc[spam_data["Email Type"] == 'Phishing Email', "Email Type",] = 1
@@ -46,13 +53,6 @@ y_train = y_train.astype('int')
 Y_test = y_val.astype('int')
 model = LogisticRegression()
 model.fit(X_train_features, y_train)
-
-form = st.form(key="my_form")
-text = form.text_area("Text to analyze")
-txt_files = form.file_uploader(label="Upload .txt files", type=["txt"], accept_multiple_files=True)
-images = form.file_uploader(label="Upload images", type=["png", "jpg", "jpeg"], accept_multiple_files=True)
-user_email = form.text_input("Send alerts to (recommended):", placeholder="johndoe@gmail.com")
-submit_button = form.form_submit_button(label="Submit")
 
 def detect(text):
    text = [text]
