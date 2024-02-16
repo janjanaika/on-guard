@@ -21,6 +21,6 @@ def log_in():
                 st.error("Wrong password!")
             
             if username == "TeamVCIS" and password == "victory":
-                switch_page("app")
+                switch_page("monitor_text")
 
 log_in()
