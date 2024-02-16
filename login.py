@@ -1,6 +1,11 @@
 import streamlit as st
 from streamlit_extras.switch_page_button import switch_page
 
+st.set_page_config(
+   page_title="Log In - On Guard",
+   page_icon="🤺"
+)
+
 st.title(":fencer: On Guard")
 def log_in():
     st.subheader("Log In")
@@ -17,4 +22,5 @@ def log_in():
             
             if username == "TeamVCIS" and password == "victory":
                 switch_page("app")
+
 log_in()
