@@ -21,7 +21,7 @@ st.set_page_config(
 def load_data():
    return pd.read_csv("Phishing_Email.csv")
 
-@st.cache_resource
+@st.cache_resource(show_spinner="Loading the image reader...")
 def load_model():
    return ocr.Reader(["en"], model_storage_directory=".")
 
