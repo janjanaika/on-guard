@@ -31,7 +31,7 @@ form = st.form(key="my_form")
 text = form.text_area("Text to analyze")
 txt_files = form.file_uploader(label="Upload .txt files", type=["txt"], accept_multiple_files=True)
 images = form.file_uploader(label="Upload images", type=["png", "jpg", "jpeg"], accept_multiple_files=True)
-user_email = form.text_input("Send alerts to (recommended):", placeholder="juandelacruz@gmail.com")
+user_email = form.text_input("(Recommended) Send alerts to:", placeholder="juandelacruz@gmail.com")
 submit_button = form.form_submit_button(label="Submit")
 
 raw_spam_data = load_data()
