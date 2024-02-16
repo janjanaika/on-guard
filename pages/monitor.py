@@ -27,12 +27,12 @@ def load_model():
 
 st.title(":fencer: On Guard")
 
-form = st.form(key="my_form")
-text = form.text_area("Text to analyze")
-txt_files = form.file_uploader(label="Upload .txt files", type=["txt"], accept_multiple_files=True)
-images = form.file_uploader(label="Upload images", type=["png", "jpg", "jpeg"], accept_multiple_files=True)
-user_email = form.text_input("(Recommended) Send alerts to:", placeholder="juandelacruz@gmail.com")
-submit_button = form.form_submit_button(label="Submit")
+with st.form(key="my_form", clear_on_submit=True):
+   text = st.text_area("Text to analyze")
+   txt_files = st.file_uploader(label="Upload .txt files", type=["txt"], accept_multiple_files=True)
+   images = st.file_uploader(label="Upload images", type=["png", "jpg", "jpeg"], accept_multiple_files=True)
+   user_email = st.text_input("(Recommended) Send alerts to:", placeholder="juandelacruz@gmail.com")
+   submit_button = st.form_submit_button(label="Monitor my child's conversations!")
 
 raw_spam_data = load_data()
 spam_data = raw_spam_data.where((pd.notnull(raw_spam_data)),"")
@@ -70,7 +70,7 @@ img_results = []
 if submit_button:
    with st.spinner("Processing your input..."):
       if len(text) == 0 or text.isspace():
-         txt = "This text is empty!"
+         txt = "The provided text is empty!"
       else:
          text = translator.translate(text).text
          if detect(text)[0] == 1:
@@ -79,7 +79,7 @@ if submit_button:
             notif_text.append(text)
             notif_text.append("\n")
          else:
-            txt = ":green[Looks like this text is safe!]"
+            txt = ":green[Looks like the provided text is safe!]"
 
       if len(txt_files) > 0:
          for f in txt_files:
