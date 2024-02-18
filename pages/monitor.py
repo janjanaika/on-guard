@@ -8,7 +8,6 @@ from googletrans import Translator
 import smtplib
 from email.mime.text import MIMEText
 import re
-import requests
 import easyocr as ocr
 from PIL import Image
 
@@ -19,7 +18,14 @@ st.set_page_config(
 
 @st.cache_data(show_spinner="Loading data...")
 def load_data():
-   return pd.read_csv("Phishing_Email.csv")
+   df = pd.read_csv("Phishing_Email.csv")
+   e = pd.DataFrame({
+      "Unnamed: 0": [18651, 18652],
+      "Email Text": ["carb23 02/11/2024 9.04 PM You're such a loser Freakl You dont deserve to be in our class Everyone in school hates you", "Hello bunso How are you bunso? It's been a while I'm doing good kuya yeah it's really been a while"],
+      "Email Type": ["Phishing Email", "Safe Email"]
+   })
+   df = df._append(e, ignore_index=True)
+   return df
 
 @st.cache_resource(show_spinner="Loading the image reader...")
 def load_model():
@@ -29,7 +35,6 @@ st.title(":fencer: On Guard")
 
 with st.form(key="my_form", clear_on_submit=True):
    text = st.text_area("Text to analyze")
-   txt_files = st.file_uploader(label="Upload .txt files", type=["txt"], accept_multiple_files=True)
    images = st.file_uploader(label="Upload images", type=["png", "jpg", "jpeg"], accept_multiple_files=True)
    user_email = st.text_input("(Recommended) Send alerts to:", placeholder="juandelacruz@gmail.com")
    submit_button = st.form_submit_button(label="Monitor my child's conversations!")
@@ -50,7 +55,7 @@ X_train_features = feature_extraction.fit_transform(X_train)
 X_test_features = feature_extraction.transform(X_val)
 
 y_train = y_train.astype('int')
-Y_test = y_val.astype('int')
+y_test = y_val.astype('int')
 model = LogisticRegression()
 model.fit(X_train_features, y_train)
 
@@ -58,6 +63,9 @@ def detect(text):
    text = [text]
    input_data_features = feature_extraction.transform(text)
    prediction = model.predict(input_data_features)
+   keywords = ["kys", "loser", "freak", "kill yourself"]
+   if any([x in keywords for x in text[0].split()]):
+      prediction = [1]
    return prediction
 
 notif_text = []
@@ -65,7 +73,6 @@ translator = Translator()
 reader = load_model()
 txt = ""
 file_results = []
-img_results = []
 
 if submit_button:
    with st.spinner("Processing your input..."):
@@ -80,21 +87,6 @@ if submit_button:
             notif_text.append("\n")
          else:
             txt = ":green[Looks like the provided text is safe!]"
-
-      if len(txt_files) > 0:
-         for f in txt_files:
-            content = f.getvalue().decode()
-            if len(content) == 0 or content.isspace():
-               file_results.append(f"{f.name} is empty!")
-            else:
-               content = translator.translate(content).text
-               if detect(content)[0] == 1:
-                  file_results.append(f":red[Threat detected in {f.name}!]")
-                  notif_text.append(f"Threat detected in {f.name}!")
-                  notif_text.append(content)
-                  notif_text.append("\n")
-               else:
-                  file_results.append(f":green[Looks like {f.name} is safe!]")
 
       if len(images) > 0:
          for img in images:
@@ -132,12 +124,10 @@ if submit_button:
       server.quit()
       if len(notif_text) > 0:
          st.error("There was a threat in your provided file(s)! More details will be sent through your email. If you don't see it, check your spam folder.")
-      elif len(txt_files) > 0 and len(notif_text) == 0:
+      elif len(images) > 0 and len(notif_text) == 0:
          st.success("Good news! Looks like all of your files are safe!")
 
 st.write(txt)
+
 for f in file_results:
    st.write(f)
-
-for i in img_results:
-   st.write(i)
